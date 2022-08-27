@@ -1,0 +1,4 @@
+column_limit: 100
+keep_simple_function_one_line: false
+break_after_table_lb: false
+break_after_operator: false
