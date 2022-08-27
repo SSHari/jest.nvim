@@ -11,7 +11,7 @@ local create_jest_run_autocmd = function(config)
         pattern = config.pattern,
         callback = function()
             -- Skip trying to run the tests if jest can't be found
-            local jest_executable_path = utils.find_jest_executable()
+            local jest_executable_path, root_dir = utils.find_jest_paths()
             if not jest_executable_path then return end
 
             local bufnr = vim.api.nvim_get_current_buf()
@@ -93,6 +93,7 @@ local create_jest_run_autocmd = function(config)
             local stop_loader = loader.start();
 
             vim.fn.jobstart(command, {
+                cwd = root_dir,
                 stdout_buffered = true,
                 on_stdout = append_data,
                 on_stderr = append_data,
