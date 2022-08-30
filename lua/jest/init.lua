@@ -110,7 +110,8 @@ end
 M.setup = function(config)
     local base_config = {
         init_type = "autocmd",
-        pattern = {"**/__tests__/**.{js,jsx,ts,tsx}", "*.spec.{js,jsx,ts,tsx}"},
+        pattern = {"**/__tests__/**.{js,jsx,ts,tsx}", "*.spec.{js,jsx,ts,tsx}",
+                   "*.test.{js,jsx,ts,tsx}"},
         root_markers = {".git", "package.json"},
         jest_commands = {{".*", "./node_modules/jest/bin/jest.js"}}
     }
