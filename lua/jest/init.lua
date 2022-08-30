@@ -10,9 +10,9 @@ local create_jest_run_autocmd = function(config)
         group = vim.api.nvim_create_augroup("TheSSHGuy_jest.nvim", {clear = true}),
         pattern = config.pattern,
         callback = function()
-            -- Skip trying to run the tests if jest can't be found
-            local jest_executable_path, root_dir = utils.find_jest_paths()
-            if not jest_executable_path then return end
+            -- Skip trying to run the tests if a root dir can't be found
+            local root_dir = utils.find_root_dir(config.root_markers)
+            if not root_dir then return end
 
             local bufnr = vim.api.nvim_get_current_buf()
             local bufnm = vim.api.nvim_buf_get_name(bufnr)
@@ -87,8 +87,12 @@ local create_jest_run_autocmd = function(config)
                 end
             end
 
-            local command = {jest_executable_path, bufnm, "--reporters", "--json",
-                             "--testLocationInResults"}
+            -- Skip trying to run the tests if a matching command can't be found
+            local command = utils.find_matching_command(config.jest_commands, root_dir)
+            if not command then return end
+
+            command = command .. " --watchAll=false --reporters --json --testLocationInResults "
+                          .. bufnm
 
             local stop_loader = loader.start();
 
@@ -105,12 +109,23 @@ end
 
 M.setup = function(config)
     local base_config = {
-        -- values: [startup, autocmd]
         init_type = "autocmd",
-        pattern = {"**/__tests__/**.{js,jsx,ts,tsx}", "*.spec.{js,jsx,ts,tsx}"}
+        pattern = {"**/__tests__/**.{js,jsx,ts,tsx}", "*.spec.{js,jsx,ts,tsx}"},
+        root_markers = {".git", "package.json"},
+        jest_commands = {{".*", "./node_modules/jest/bin/jest.js"}}
     }
 
     local merged_config = vim.tbl_deep_extend("force", base_config, config)
+
+    -- Verify config is valid
+    vim.validate({
+        init_type = {merged_config.init_type, function(arg)
+            return arg == "autocmd" or arg == "startup"
+        end, "autocmd or startup"},
+        pattern = {merged_config.pattern, "table"},
+        root_markers = {merged_config.root_markers, "table"},
+        jest_commands = {merged_config.jest_commands, "table"}
+    })
 
     if merged_config.init_type == "startup" then create_jest_run_autocmd(merged_config) end
     if merged_config.init_type == "autocmd" then

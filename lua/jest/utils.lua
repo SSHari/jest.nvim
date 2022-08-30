@@ -7,17 +7,17 @@ M.parse_output = function(data)
     end
 end
 
-M.find_jest_paths = function()
-    local relative_path = vim.fn.expand("%")
-    local absolute_path = vim.fn.expand("%:p")
-    local node_modules = vim.fn.finddir("node_modules", absolute_path .. ";")
-    local jest_executable = vim.fn.findfile("jest.js", node_modules .. "/jest/bin")
+M.find_root_dir = function(root_markers)
+    local full_path = vim.fn.expand("%:p")
+    return vim.fs.dirname(vim.fs.find(root_markers, {path = full_path, upward = true})[1])
+end
 
-    if jest_executable then
-        local root_dir = string.gsub(node_modules, "node_modules", "")
-        -- Return the jest executable and root directory path
-        return string.gsub(absolute_path, relative_path, jest_executable),
-               string.gsub(absolute_path, relative_path, root_dir)
+M.find_matching_command = function(jest_commands, root_dir)
+    for _, command_tuple in ipairs(jest_commands) do
+        local path_regex = command_tuple[1]
+        local jest_command = command_tuple[2]
+
+        if string.match(root_dir, path_regex) then return jest_command end
     end
 end
 
