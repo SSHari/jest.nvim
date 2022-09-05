@@ -6,7 +6,7 @@ local M = {}
 local ns = vim.api.nvim_create_namespace("TheSSHGuy_jest.nvim")
 
 local create_jest_run_autocmd = function(config)
-    vim.api.nvim_create_autocmd("BufWritePost", {
+    local autocmd_nr = vim.api.nvim_create_autocmd("BufWritePost", {
         group = vim.api.nvim_create_augroup("TheSSHGuy_jest.nvim", {clear = true}),
         pattern = config.pattern,
         callback = function()
@@ -105,6 +105,18 @@ local create_jest_run_autocmd = function(config)
             })
         end
     })
+
+    -- Create a one time user command to stop the process
+    vim.api.nvim_create_user_command("JestStop", function()
+        -- Clear plugin display information
+        local bufnr = vim.api.nvim_get_current_buf()
+        vim.diagnostic.reset(ns, bufnr)
+        vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+
+        -- Remove the autocmd and user command
+        vim.api.nvim_del_autocmd(autocmd_nr)
+        vim.api.nvim_del_user_command("JestStop")
+    end, {})
 end
 
 M.setup = function(config)

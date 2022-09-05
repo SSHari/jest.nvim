@@ -42,6 +42,8 @@ Plug TheSSHGuy/jest.nvim
 - `autocmd` - this tells neovim to create the user command `JestStart`. Running the user command will create an autocmd that executes jest on file save.
 - `startup` - this skips the user command and sets up the autocmd when neovim starts.
 
+**Note:** When the autocmd is created a one time user command `JestStop` is created to clear any existing diagnostic information and stop the process.
+
 ### `pattern`
 
 This is the pattern that is used for the autocmd. It's an array of strings that represent filename patterns that should run the autocmd.
